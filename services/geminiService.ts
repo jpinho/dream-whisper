@@ -1,4 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import { StoryIdea } from "../types";
 
 const API_KEY = process.env.API_KEY;
 if (!API_KEY) {
@@ -16,7 +17,26 @@ const getSystemInstruction = (task: 'ideas' | 'story') => {
     return `You are a master storyteller for children aged 3 to 10. Write short, engaging, and simple paragraphs (about 3-5 sentences) that continue the story. Then, provide three distinct, short, and easy-to-understand choices for what happens next. One choice should be funny, one adventurous, and one gentle. The story must always be positive, age-appropriate, and free of scary elements. Ensure the story naturally concludes on a happy, calming note after about 5-7 steps. When it's time to end, provide a concluding paragraph and an empty array for choices. For the very first part of a new story, also provide a short, visual description of the main character(s) to ensure visual consistency in illustrations.`;
 };
 
-export async function getStoryIdeas(category: string): Promise<string[]> {
+async function generateImage(prompt: string, characterDescription?: string): Promise<string> {
+    let fullPrompt = `A beautiful, whimsical, storybook illustration for children in a soft and gentle art style, showing: ${prompt}. Use vibrant, warm colors, with a dreamy, magical atmosphere. No scary or dark elements.`;
+    if (characterDescription) {
+        fullPrompt += ` The main character(s) should be visually consistent and look like this: ${characterDescription}.`;
+    }
+    const response = await ai.models.generateImages({
+        model: imageModel,
+        prompt: fullPrompt,
+        config: {
+            numberOfImages: 1,
+            outputMimeType: 'image/jpeg',
+            aspectRatio: '16:9',
+        },
+    });
+
+    const base64ImageBytes = response.generatedImages[0].image.imageBytes;
+    return `data:image/jpeg;base64,${base64ImageBytes}`;
+}
+
+export async function getStoryIdeas(category: string): Promise<StoryIdea[]> {
     const response = await ai.models.generateContent({
         model: textModel,
         contents: `Generate 3 one-sentence story ideas for a bedtime story in the '${category}' category.`,
@@ -37,30 +57,24 @@ export async function getStoryIdeas(category: string): Promise<string[]> {
 
     try {
         const json = JSON.parse(response.text);
-        return json.ideas || [];
+        const ideas: string[] = json.ideas || [];
+        
+        if (ideas.length === 0) {
+            return [];
+        }
+
+        const imagePromises = ideas.map(idea => generateImage(idea));
+        const imageUrls = await Promise.all(imagePromises);
+
+        return ideas.map((idea, index) => ({
+            title: idea,
+            imageUrl: imageUrls[index]
+        }));
+
     } catch (e) {
-        console.error("Failed to parse story ideas JSON:", e);
+        console.error("Failed to parse story ideas JSON or generate images:", e);
         return [];
     }
-}
-
-async function generateImage(prompt: string, characterDescription?: string): Promise<string> {
-    let fullPrompt = `A beautiful, whimsical, storybook illustration for children in a soft and gentle art style, showing: ${prompt}. Use vibrant, warm colors, with a dreamy, magical atmosphere. No scary or dark elements.`;
-    if (characterDescription) {
-        fullPrompt += ` The main character(s) should be visually consistent and look like this: ${characterDescription}.`;
-    }
-    const response = await ai.models.generateImages({
-        model: imageModel,
-        prompt: fullPrompt,
-        config: {
-            numberOfImages: 1,
-            outputMimeType: 'image/jpeg',
-            aspectRatio: '16:9',
-        },
-    });
-
-    const base64ImageBytes = response.generatedImages[0].image.imageBytes;
-    return `data:image/jpeg;base64,${base64ImageBytes}`;
 }
 
 async function generateStoryPart(prompt: string): Promise<{ storyPart: string; choices: string[]; characterDescription?: string; }> {

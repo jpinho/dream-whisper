@@ -1,12 +1,12 @@
 import { Category } from './types';
 
 export const MUSIC_TRACKS = {
-  HOME: 'https://www.chosic.com/wp-content/uploads/2021/05/inspiring-and-upbeat-music.mp3',
-  FANTASY: 'https://www.chosic.com/wp-content/uploads/2022/01/And-So-It-Begins.mp3',
-  ADVENTURE: 'https://www.chosic.com/wp-content/uploads/2024/01/The-Epic-2.mp3',
-  ANIMALS: 'https://www.chosic.com/wp-content/uploads/2021/04/Once-Upon-a-Time.mp3',
-  MYSTERY: 'https://www.chosic.com/wp-content/uploads/2020/08/cinematic-documentary-piano.mp3',
-  SPACE: 'https://www.chosic.com/wp-content/uploads/2023/07/Interstellar-Journey.mp3',
+  HOME: 'https://cdn.pixabay.com/audio/2022/11/17/audio_8529542615.mp3',
+  FANTASY: 'https://cdn.pixabay.com/audio/2022/05/27/audio_3433c23924.mp3',
+  ADVENTURE: 'https://cdn.pixabay.com/audio/2023/08/03/audio_eb7c132053.mp3',
+  ANIMALS: 'https://cdn.pixabay.com/audio/2023/02/10/audio_5532435a29.mp3',
+  MYSTERY: 'https://cdn.pixabay.com/audio/2022/08/04/audio_2dee654034.mp3',
+  SPACE: 'https://cdn.pixabay.com/audio/2022/03/24/audio_386227419e.mp3',
 };
 
 export const STORY_CATEGORIES: Category[] = [

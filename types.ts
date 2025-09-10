@@ -26,3 +26,8 @@ export interface Story {
   choices: string[];
   characterDescription?: string;
 }
+
+export interface StoryIdea {
+  title: string;
+  imageUrl: string;
+}
